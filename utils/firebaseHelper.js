@@ -1,4 +1,13 @@
-// Import the functions you need from the SDKs you need
+// ******************JustApp*****************
+// A Custom Messenger App for kids 5 to 16 years old.
+// Using React Native, an Expo
+//
+// Author: Hernan Clarke
+// Using Reach Native to build once and deploy on the web - android - ios
+// Databse: Goggle Firebase
+// Auth:  Google Authenticator
+// Storage: Google Storage
+
 import { initializeApp } from 'firebase/app';
 
 export const getFirebaseApp = () => {

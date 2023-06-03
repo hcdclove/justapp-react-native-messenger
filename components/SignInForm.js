@@ -1,3 +1,13 @@
+// ******************JustApp*****************
+// A Custom Messenger App for kids 5 to 16 years old.
+// Using React Native, an Expo
+//
+// Author: Hernan Clarke
+// Using Reach Native to build once and deploy on the web - android - ios
+// Databse: Goggle Firebase
+// Auth:  Google Authenticator
+// Storage: Google Storage
+
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import Input from '../components/Input';
 import SubmitButton from '../components/SubmitButton';
@@ -13,86 +23,96 @@ import colors from '../constants/colors';
 const isTestMode = true;
 
 const initialState = {
-    inputValues: {
-        email: isTestMode ? "reece@example.com" : "",
-        password: isTestMode ? "password" : "",
+  inputValues: {
+    email: isTestMode ? 'reece@example.com' : '',
+    password: isTestMode ? 'password' : ''
+  },
+  inputValidities: {
+    email: isTestMode,
+    password: isTestMode
+  },
+  formIsValid: isTestMode
+};
+
+const SignInForm = (props) => {
+  const dispatch = useDispatch();
+
+  const [error, setError] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formState, dispatchFormState] = useReducer(reducer, initialState);
+
+  const inputChangedHandler = useCallback(
+    (inputId, inputValue) => {
+      const result = validateInput(inputId, inputValue);
+      dispatchFormState({ inputId, validationResult: result, inputValue });
     },
-    inputValidities: {
-        email: isTestMode,
-        password: isTestMode,
-    },
-    formIsValid: isTestMode
-}
+    [dispatchFormState]
+  );
 
-const SignInForm = props => {
-    const dispatch = useDispatch();
+  useEffect(() => {
+    if (error) {
+      Alert.alert('An error occured', error, [{ text: 'Okay' }]);
+    }
+  }, [error]);
 
-    const [error, setError] = useState();
-    const [isLoading, setIsLoading] = useState(false);
-    const [formState, dispatchFormState] = useReducer(reducer, initialState);
+  const authHandler = useCallback(async () => {
+    try {
+      setIsLoading(true);
 
-    const inputChangedHandler = useCallback((inputId, inputValue) => {
-        const result = validateInput(inputId, inputValue);
-        dispatchFormState({ inputId, validationResult: result, inputValue })
-    }, [dispatchFormState]);
+      const action = signIn(
+        formState.inputValues.email,
+        formState.inputValues.password
+      );
+      setError(null);
+      await dispatch(action);
+    } catch (error) {
+      setError(error.message);
+      setIsLoading(false);
+    }
+  }, [dispatch, formState]);
 
-    useEffect(() => {
-        if (error) {
-            Alert.alert("An error occured", error, [{ text: "Okay" }]);
-        }
-    }, [error])
+  return (
+    <>
+      <Input
+        id='email'
+        label='Email'
+        icon='mail'
+        iconPack={Feather}
+        autoCapitalize='none'
+        keyboardType='email-address'
+        onInputChanged={inputChangedHandler}
+        initialValue={formState.inputValues.email}
+        errorText={formState.inputValidities['email']}
+      />
 
-    const authHandler = useCallback(async () => {
-        try {
-            setIsLoading(true);
+      <Input
+        id='password'
+        label='Password'
+        icon='lock'
+        iconPack={Feather}
+        autoCapitalize='none'
+        secureTextEntry
+        onInputChanged={inputChangedHandler}
+        initialValue={formState.inputValues.password}
+        errorText={formState.inputValidities['password']}
+      />
 
-            const action = signIn(
-                formState.inputValues.email,
-                formState.inputValues.password,
-            );
-            setError(null);
-            await dispatch(action);
-        } catch (error) {
-            setError(error.message);
-            setIsLoading(false);
-        }
-    }, [dispatch, formState]);
-
-    return (
-            <>
-                <Input
-                    id="email"
-                    label="Email"
-                    icon="mail"
-                    iconPack={Feather}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                    onInputChanged={inputChangedHandler}
-                    initialValue={formState.inputValues.email}
-                    errorText={formState.inputValidities["email"]} />
-
-                <Input
-                    id="password"
-                    label="Password"
-                    icon="lock"
-                    iconPack={Feather}
-                    autoCapitalize="none"
-                    secureTextEntry
-                    onInputChanged={inputChangedHandler}
-                    initialValue={formState.inputValues.password}
-                    errorText={formState.inputValidities["password"]} />
-                
-                {
-                    isLoading ? 
-                    <ActivityIndicator size={'small'} color={colors.primary} style={{ marginTop: 10 }} /> :
-                    <SubmitButton
-                        title="Sign in"
-                        onPress={authHandler}
-                        style={{ marginTop: 20 }}
-                        disabled={!formState.formIsValid}/>
-                }
-            </>
-    )
+      {isLoading ? (
+        <ActivityIndicator
+          size={'small'}
+          color={colors.primary}
+          style={{ marginTop: 10 }}
+        />
+      ) : (
+        <SubmitButton
+          title='Sign in'
+          onPress={authHandler}
+          style={{ marginTop: 20 }}
+          disabled={!formState.formIsValid}
+        />
+      )}
+    </>
+  );
 };
 
 export default SignInForm;

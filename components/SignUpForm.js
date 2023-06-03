@@ -1,3 +1,13 @@
+// ******************JustApp*****************
+// A Custom Messenger App for kids 5 to 16 years old.
+// Using React Native, an Expo
+//
+// Author: Hernan Clarke
+// Using Reach Native to build once and deploy on the web - android - ios
+// Databse: Goggle Firebase
+// Auth:  Google Authenticator
+// Storage: Google Storage
+
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import Input from '../components/Input';
 import SubmitButton from '../components/SubmitButton';
@@ -11,109 +21,120 @@ import colors from '../constants/colors';
 import { useDispatch, useSelector } from 'react-redux';
 
 const initialState = {
-    inputValues: {
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
+  inputValues: {
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: ''
+  },
+  inputValidities: {
+    firstName: false,
+    lastName: false,
+    email: false,
+    password: false
+  },
+  formIsValid: false
+};
+
+const SignUpForm = (props) => {
+  const dispatch = useDispatch();
+
+  const [error, setError] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formState, dispatchFormState] = useReducer(reducer, initialState);
+
+  const inputChangedHandler = useCallback(
+    (inputId, inputValue) => {
+      const result = validateInput(inputId, inputValue);
+      dispatchFormState({ inputId, validationResult: result, inputValue });
     },
-    inputValidities: {
-        firstName: false,
-        lastName: false,
-        email: false,
-        password: false,
-    },
-    formIsValid: false
-}
+    [dispatchFormState]
+  );
 
-const SignUpForm = props => {
+  useEffect(() => {
+    if (error) {
+      Alert.alert('An error occured', error, [{ text: 'Okay' }]);
+    }
+  }, [error]);
 
-    const dispatch = useDispatch();
+  const authHandler = useCallback(async () => {
+    try {
+      setIsLoading(true);
 
-    const [error, setError] = useState();
-    const [isLoading, setIsLoading] = useState(false);
-    const [formState, dispatchFormState] = useReducer(reducer, initialState);
+      const action = signUp(
+        formState.inputValues.firstName,
+        formState.inputValues.lastName,
+        formState.inputValues.email,
+        formState.inputValues.password
+      );
+      setError(null);
+      await dispatch(action);
+    } catch (error) {
+      setError(error.message);
+      setIsLoading(false);
+    }
+  }, [dispatch, formState]);
 
-    const inputChangedHandler = useCallback((inputId, inputValue) => {
-        const result = validateInput(inputId, inputValue);
-        dispatchFormState({ inputId, validationResult: result, inputValue })
-    }, [dispatchFormState]);
+  return (
+    <>
+      <Input
+        id='firstName'
+        label='First name'
+        icon='user-o'
+        iconPack={FontAwesome}
+        onInputChanged={inputChangedHandler}
+        autoCapitalize='none'
+        errorText={formState.inputValidities['firstName']}
+      />
 
-    useEffect(() => {
-        if (error) {
-            Alert.alert("An error occured", error, [{ text: "Okay" }]);
-        }
-    }, [error])
+      <Input
+        id='lastName'
+        label='Last name'
+        icon='user-o'
+        iconPack={FontAwesome}
+        onInputChanged={inputChangedHandler}
+        autoCapitalize='none'
+        errorText={formState.inputValidities['lastName']}
+      />
 
-    const authHandler = useCallback(async () => {
-        try {
-            setIsLoading(true);
+      <Input
+        id='email'
+        label='Email'
+        icon='mail'
+        iconPack={Feather}
+        onInputChanged={inputChangedHandler}
+        keyboardType='email-address'
+        autoCapitalize='none'
+        errorText={formState.inputValidities['email']}
+      />
 
-            const action = signUp(
-                formState.inputValues.firstName,
-                formState.inputValues.lastName,
-                formState.inputValues.email,
-                formState.inputValues.password,
-            );
-            setError(null);
-            await dispatch(action);
-        } catch (error) {
-            setError(error.message);
-            setIsLoading(false);
-        }
-    }, [dispatch, formState]);
+      <Input
+        id='password'
+        label='Password'
+        icon='lock'
+        autoCapitalize='none'
+        secureTextEntry
+        iconPack={Feather}
+        onInputChanged={inputChangedHandler}
+        errorText={formState.inputValidities['password']}
+      />
 
-    return (
-            <>
-                <Input
-                    id="firstName"
-                    label="First name"
-                    icon="user-o"
-                    iconPack={FontAwesome}
-                    onInputChanged={inputChangedHandler}
-                    autoCapitalize="none"
-                    errorText={formState.inputValidities["firstName"]} />
-
-                <Input
-                    id="lastName"
-                    label="Last name"
-                    icon="user-o"
-                    iconPack={FontAwesome}
-                    onInputChanged={inputChangedHandler}
-                    autoCapitalize="none"
-                    errorText={formState.inputValidities["lastName"]} />
-
-                <Input
-                    id="email"
-                    label="Email"
-                    icon="mail"
-                    iconPack={Feather}
-                    onInputChanged={inputChangedHandler}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    errorText={formState.inputValidities["email"]} />
-
-                <Input
-                    id="password"
-                    label="Password"
-                    icon="lock"
-                    autoCapitalize="none"
-                    secureTextEntry
-                    iconPack={Feather}
-                    onInputChanged={inputChangedHandler}
-                    errorText={formState.inputValidities["password"]} />
-                
-                {
-                    isLoading ? 
-                    <ActivityIndicator size={'small'} color={colors.primary} style={{ marginTop: 10 }} /> :
-                    <SubmitButton
-                        title="Sign up"
-                        onPress={authHandler}
-                        style={{ marginTop: 20 }}
-                        disabled={!formState.formIsValid}/>
-                }
-            </>
-    )
+      {isLoading ? (
+        <ActivityIndicator
+          size={'small'}
+          color={colors.primary}
+          style={{ marginTop: 10 }}
+        />
+      ) : (
+        <SubmitButton
+          title='Sign up'
+          onPress={authHandler}
+          style={{ marginTop: 20 }}
+          disabled={!formState.formIsValid}
+        />
+      )}
+    </>
+  );
 };
 
 export default SignUpForm;
