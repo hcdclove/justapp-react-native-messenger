@@ -1,1 +1,1 @@
-web: node app.js
+web: npx serve web-build
