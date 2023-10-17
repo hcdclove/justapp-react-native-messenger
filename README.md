@@ -23,3 +23,4 @@ Settings pages
 Home screen in smart phone simulator
 
 ![Alt text](image.png)
+   
