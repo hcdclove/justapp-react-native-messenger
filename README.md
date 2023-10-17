@@ -1,7 +1,14 @@
 # justapp
 
-This is a messenger app I created using Reach Native. We use for storagem authentication and database Google Firebase.
+This is a messenger app I created using Reach Native. 
 
-For Development environment I used Expo CLI within VS Code.
+Tech Stack:
 
-My repository is located at Github
+React Native
+Expo CLI
+VS Visual Code
+Google Firebase.
+
+Home screen in smart phone simulator
+
+![Alt text](image.png)
