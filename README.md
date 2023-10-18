@@ -15,7 +15,7 @@ Instant messaging in real time
 Sending image messages
 Group chat support
 Profile pictures
-Group chat photos
+Group chat photos 
 Message replies
 A full user search
 Settings pages
